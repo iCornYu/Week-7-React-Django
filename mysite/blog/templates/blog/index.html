@@ -1,0 +1,15 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+    <h1>This is our new index page!</h1>
+    {% for post in posts %}
+
+        {% if post.author == "Ivan Wang" %}
+            <h2> The Best Instructor</h2>
+        {% endif %}
+        
+        <h3>{{ post.title }}</h3>
+        <h5>By {{ post.author }} on {{ post.date_posted }}</h5>
+        <h5>{{ post.content }}</h5>
+    {% endfor %}
+
+{% endblock %}
