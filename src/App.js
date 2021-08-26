@@ -11,6 +11,9 @@ import CreatePost from './views/CreatePost';
 import UpdatePost from './views/UpdatePost';
 import Shop from './views/Shop';
 import IndividualShop from './views/IndividualShop';
+import Cart from './views/Cart';
+import Login from './views/Login';
+import Register from './views/Register';
 
 
 export default class App extends Component {
@@ -21,6 +24,7 @@ export default class App extends Component {
       // company: "Coding Summit",
       cart: [],
     }
+    this.removeFromCart = this.removeFromCart.bind(this)
   }
 
   addToCart= (product) => {
@@ -28,7 +32,17 @@ export default class App extends Component {
       cart: this.state.cart.concat(product)
     })
   }
-  removeFromCart= () => {}
+  removeFromCart (product) {
+    let newCart = [...this.state.cart]
+    for(let i = newCart.length-1; i>=0; i--){
+      if(product.product_id === newCart[i].product_id){
+        newCart.splice(i,1);
+        break
+      }
+    }
+    
+    this.setState({cart: newCart})
+  }
   sumTotalCart = (cartList) => {
     let total = 0;
     for(let item of cartList){
@@ -39,6 +53,7 @@ export default class App extends Component {
 
   render() {
     return (
+
       <div>
         <Nav cart={this.state.cart} sumTotalCart = {this.sumTotalCart}/>
   
@@ -53,7 +68,9 @@ export default class App extends Component {
           <Route exact path='/blog/update/:id' render={({match}) => <UpdatePost my_match={match}/>}/>
           <Route exact path='/shop' render={() => <Shop addToCart={this.addToCart}/>}/>
           <Route exact path='/shop/:product_id' render={({match}) => <IndividualShop match={match} addToCart={this.addToCart}/>}/>
-
+          <Route exact path='/cart' render={() => <Cart removeFromCart={this.removeFromCart} sumTotalCart={this.sumTotalCart} cart = {this.state.cart}/>}/>
+          <Route exact path='/login' render={() => <Login />}/>
+          <Route exact path='/register' render={() => <Register />}/>
         </Switch>
       </div>
     )

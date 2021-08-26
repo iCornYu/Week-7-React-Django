@@ -19,10 +19,10 @@ export default class Nav extends Component {
                                 <Link className="nav-link" to="/about">About</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/news">News</Link>
+                                <Link className="nav-link" to="/news"><i className="fas fa-newspaper"></i> Newspaper</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/students">Students</Link>
+                                <Link className="nav-link" to="/students"><i className="fas fa-user-graduate"></i> Student</Link>
                             </li>
                             <li className="nav-item">
                                 <Link className="nav-link" to="/blog">Blog</Link>
@@ -31,13 +31,22 @@ export default class Nav extends Component {
                                 <Link className="nav-link" to="/blog/create">Create Post</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/shop">Shop</Link>
+                                <Link className="nav-link" to="/shop"><i className="fas fa-store"></i> Shop</Link>
                             </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/shop">{this.props.cart.length}|{this.props.sumTotalCart(this.props.cart)}</Link>
+                            <li className="nav-item justify-items-end">
+                                <Link className="nav-link" to="/cart"><i className="fas fa-cart-plus"></i>
+                                    {this.props.cart.length}|{this.props.sumTotalCart(this.props.cart)}</Link>
                             </li>
                         </ul>
                     </div>
+                    <div className="d-inline-flex justify-content-end">
+                            <Link className="" to="/register">
+                                <button className="btn btn-primary">Register</button>
+                            </Link>
+                            <Link className="" to="/login">
+                                <button className="btn btn-success">Login</button>
+                            </Link>
+                        </div>
                 </div>
             </nav>
         )
