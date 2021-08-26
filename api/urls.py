@@ -11,4 +11,6 @@ urlpatterns = [
     path('posts/delete/<int:post_id>/', views.deletePost, name='api-deletepost'),
     path('products/', views.products, name='api-products'),
     path('products/<int:product_id>', views.individual, name='api-individual'),
+    path('login/', views.login, name='api-login'),
+    path('register/', views.register, name='api-register'),
 ]

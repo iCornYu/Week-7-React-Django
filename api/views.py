@@ -40,6 +40,8 @@ def createPost(request):
 @api_view(["POST"])
 def updatePost(request, post_id):
     post = Post.objects.get(id=post_id)
+    # if post.author.id != request.data.author:
+    #     return Response({"messages": "You cannot delete another user's post."})
     serializer = PostSerializer(instance=post, data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -62,3 +64,14 @@ def individual(request, product_id):
     product = Product.objects.get(product_id=product_id)
     serializer = ShopSerializer(product, many=False)
     return Response(serializer.data)
+
+@api_view(["GET"])
+def login(request):
+    print("Login get request went through.")
+    return Response({"messages": "Successfully logged in."})
+
+@api_view(["GET"])
+def register(request):
+    print("Register get request went through.")
+    return Response({"messages": "Successfully signed up."})
+

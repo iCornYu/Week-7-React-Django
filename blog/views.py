@@ -100,7 +100,7 @@ def loginPage(request):
             print(f'{user} is logged in.')
             return redirect('blog-index')
         messages.info(request, "Incorrect username or password. Please try again.")
-    return render(request,'blog/login.html')
+    return render(request,'blog/login.htm')
 
 @login_required(login_url = 'blog-login')
 def logoutUser(request):
