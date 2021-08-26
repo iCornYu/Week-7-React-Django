@@ -33,6 +33,9 @@ export default class Nav extends Component {
                             <li className="nav-item">
                                 <Link className="nav-link" to="/shop">Shop</Link>
                             </li>
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/shop">{this.props.cart.length}|{this.props.sumTotalCart(this.props.cart)}</Link>
+                            </li>
                         </ul>
                     </div>
                 </div>

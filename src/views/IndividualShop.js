@@ -15,37 +15,26 @@ export default class IndividualShop extends Component {
         const imageres = await fetch(`http://127.0.0.1:8000/media/${this.props.match.params.product_id}.jpg`)
         const imageBlob = await imageres.blob()
         const imageObjectURL = URL.createObjectURL(imageBlob)
-        // console.log(imageObjectURL)
+        console.log(imageObjectURL)
         this.setState({
             product: data,
             image: imageObjectURL,
         })
+        console.log(this.state.image)
     }
 
-    importImage =  () => {
-        const imageUrl = `http://127.0.0.1:8000/media/${this.props.match.params.product_id}.jpg`
-        fetch(imageUrl)
-            .then(res=> res.blob())
-            .then(imageBlob => {
-                const imageObjectURL = URL.createObjectURL(imageBlob)
-                console.log(imageObjectURL)
-                return imageObjectURL
-                
-            })
-    }
 
     render() {
         const p = this.state.product
-        const i = this.importImage()
-        console.log(i)
         return (
             
             <div className="card col-8">
-                <img src="" className="card-img-top" alt="..." />
+                <img src={this.state.image} className="card-img-top" alt="..." />
                 <div className="card-body">
                     <h5 className="card-title">{p.title}</h5>
                     <p className="card-text">{p.product_type}</p>
                     <p className="card-text">${p.price}</p>
+                    <button onClick={()=>this.props.addToCart(p)}className="btn btn-primary">Add to Cart</button>
                 </div>
             </div>
         )

@@ -14,7 +14,7 @@ export default class Home extends Component {
     }
 
     handleDelete = () => {
-        fetch(`http://127.0.0.1:8000/api/posts/delete/11`, {
+        fetch(`http://127.0.0.1:8000/api/posts/delete/1/`, {
             method: "DELETE"
         })
             .then(res => res.json())

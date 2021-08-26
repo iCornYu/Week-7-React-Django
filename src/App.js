@@ -17,17 +17,30 @@ export default class App extends Component {
   constructor(){
     super();
     this.state = {
-      name: "Chien Yu",
-      company: "Coding Summit"
-
+      // name: "Chien Yu",
+      // company: "Coding Summit",
+      cart: [],
     }
   }
 
+  addToCart= (product) => {
+    this.setState({
+      cart: this.state.cart.concat(product)
+    })
+  }
+  removeFromCart= () => {}
+  sumTotalCart = (cartList) => {
+    let total = 0;
+    for(let item of cartList){
+      total += parseFloat(item.price)
+    }
+    return total.toFixed(2)
+  }
 
   render() {
     return (
       <div>
-        <Nav />
+        <Nav cart={this.state.cart} sumTotalCart = {this.sumTotalCart}/>
   
         <Switch>
           <Route exact path='/' render={() => <Home/>}/>
@@ -38,8 +51,8 @@ export default class App extends Component {
           <Route exact path='/blog/create' render={() => <CreatePost />}/>
           <Route exact path='/blog/:id' render={({match}) => <PostDetail my_match={match}/>}/>
           <Route exact path='/blog/update/:id' render={({match}) => <UpdatePost my_match={match}/>}/>
-          <Route exact path='/shop' render={() => <Shop />}/>
-          <Route exact path='/shop/:product_id' render={({match}) => <IndividualShop match={match}/>}/>
+          <Route exact path='/shop' render={() => <Shop addToCart={this.addToCart}/>}/>
+          <Route exact path='/shop/:product_id' render={({match}) => <IndividualShop match={match} addToCart={this.addToCart}/>}/>
 
         </Switch>
       </div>
