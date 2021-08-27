@@ -1,6 +1,13 @@
 import React, { Component } from 'react'
 
 export default class Cart extends Component {
+    constructor() {
+        super();
+        this.state = {
+            cart: [],
+            cart_id: [],
+        }
+    }
 
     getUniqueCart = (cart) => {
         let uniqueCart = [];
@@ -24,44 +31,142 @@ export default class Cart extends Component {
         return count
     }
 
+    componentDidMount = async () => {
+        if (this.props.isLoggedIn === true) {
+            const username = JSON.parse(localStorage.getItem('user')).username
+            console.log(username)
+            const res = await fetch(`http://127.0.0.1:8000/api/cart/${username}`)
+            const data = await res.json();
+
+            this.setState({
+                cart_id: data
+            })
+            console.log(this.state.cart_id)
+            for (let x of data) {
+                let product_id = x.product
+                const productres = await fetch(`http://127.0.0.1:8000/api/products/${product_id}`)
+                const productdata = await productres.json();
+                this.setState({
+                    cart: this.state.cart.concat(productdata)
+                })
+
+            }
+
+        }
+    }
+
+    deleteCart = async (product) => {
+        const token = JSON.parse(localStorage.getItem('user')).token;
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        let cart_id = null
+        for (let cartitem of this.state.cart_id) {
+            console.log(cartitem)
+            if (product.product_id === cartitem.product) {
+                cart_id = cartitem.cart_id
+                break
+            }
+        }
+        let newCart = [...this.state.cart]
+        for (let i = newCart.length - 1; i >= 0; i--) {
+            if (product.product_id === newCart[i].product_id) {
+                newCart.splice(i, 1);
+                break
+            }
+        }
+        this.setState({ cart: newCart })
+        console.log(cart_id)
+        const res = await fetch(`http://127.0.0.1:8000/api/cart/${username}/delete/${cart_id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Token ${token}`,
+            }
+        })
+        const data = await res.json()
+        console.log(data)
+
+
+    }
+
     render() {
-        return (
-            <>{this.props.cart.length > 0 ? (
-                <div className="container">
-                    <table className="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                                <th>Subtotal</th>
-                                <th>Remove</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {this.getUniqueCart(this.props.cart).map(p => (
-                                <tr key={p.product_id}>
-                                    <td>{p.product_id}</td>
-                                    <td>{p.product_type}</td>
-                                    <td>{this.getQuantity(p, this.props.cart)}</td>
-                                    <td>{p.price}</td>
-                                    <td>${(this.getQuantity(p, this.props.cart) * p.price).toFixed(2)}</td>
-                                    <td>
-                                        <button onClick={() => this.props.removeFromCart(p)} className="btn btn-danger">Remove</button>
-                                    </td>
+        if (this.props.isLoggedIn === false) {
+            return (
+                <>{this.props.cart.length > 0 ? (
+                    <div className="container">
+                        <table className="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                    <th>Remove</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {this.getUniqueCart(this.props.cart).map(p => (
+                                    <tr key={p.product_id}>
+                                        <td>{p.product_id}</td>
+                                        <td>{p.product_type}</td>
+                                        <td>{this.getQuantity(p, this.props.cart)}</td>
+                                        <td>{p.price}</td>
+                                        <td>${(this.getQuantity(p, this.props.cart) * p.price).toFixed(2)}</td>
+                                        <td>
+                                            <button onClick={() => this.props.removeFromCart(p)} className="btn btn-danger">Remove</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 ) : (
-                <div className="container">
-                    <h1>Your cart is empty </h1>
-                </div>
-                
+                    <div className="container">
+                        <h1>Your cart is empty </h1>
+                    </div>
+
                 )}
-            </>
-        )
+                </>
+            )
+        } else {
+            return (
+                <>{this.state.cart.length > 0 ? (
+                    <div className="container">
+                        <table className="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                    <th>Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.getUniqueCart(this.state.cart).map(p => (
+                                    <tr key={p.product_id}>
+                                        <td>{p.product_id}</td>
+                                        <td>{p.product_type}</td>
+                                        <td>{this.getQuantity(p, this.state.cart)}</td>
+                                        <td>{p.price}</td>
+                                        <td>${(this.getQuantity(p, this.state.cart) * p.price).toFixed(2)}</td>
+                                        <td>
+                                            <button onClick={() => this.deleteCart(p)} className="btn btn-danger">Remove</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="container">
+                        <h1>Your cart is empty </h1>
+                    </div>
+
+                )}
+                </>
+            )
+        }
+
     }
 }

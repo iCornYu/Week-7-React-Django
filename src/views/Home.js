@@ -30,7 +30,6 @@ export default class Home extends Component {
         return (
             <div>
                 <h1>This is the Home Page</h1>
-                <button onClick={this.handleDelete()}>Delete from Django</button>
             </div>
         )
     }

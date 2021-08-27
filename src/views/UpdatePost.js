@@ -4,10 +4,12 @@ export default class UpdatePost extends Component {
 
     updatePost = async (event) => {
         event.preventDefault()
+        const token = JSON.parse(localStorage.getItem('user')).token;
         const res = await fetch(`http://127.0.0.1:8000/api/posts/update/${this.props.my_match.params.id}/`,{
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization" : `Token ${token}`,
             },
             body: JSON.stringify({
                 "title": event.target.title.value,

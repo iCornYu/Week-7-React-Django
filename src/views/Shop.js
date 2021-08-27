@@ -27,7 +27,7 @@ export default class Shop extends Component {
         return (
             <div className="container"> 
                 <div className="row">
-                    {this.state.products.map((p, i) => <ShopPost addToCart={this.props.addToCart} product={p} key={i}/>)}
+                    {this.state.products.map((p, i) => <ShopPost addToCart={this.props.addToCart} isLoggedIn ={this.props.isLoggedIn} product={p} key={i}/>)}
                 </div>
             </div>
         )

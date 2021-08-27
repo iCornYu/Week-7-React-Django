@@ -22,8 +22,12 @@ export default class PostDetail extends Component {
 
 
     handleDelete = async () => {
+        const token = JSON.parse(localStorage.getItem('user')).token;
         const res = await fetch(`http://127.0.0.1:8000/api/posts/delete/${this.props.my_match.params.id}/`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: {
+                "Authorization" : `Token ${token}`,
+            }
         })
         const data = await res.json()
         console.log(data)
