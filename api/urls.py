@@ -2,6 +2,10 @@ from django.urls import path
 
 from . import views
 
+#import built-in login function (view)
+from rest_framework.authtoken.views import obtain_auth_token
+
+
 urlpatterns = [
     path('', views.index, name='api-index'),
     path('posts/', views.posts, name='api-posts'),
@@ -11,6 +15,9 @@ urlpatterns = [
     path('posts/delete/<int:post_id>/', views.deletePost, name='api-deletepost'),
     path('products/', views.products, name='api-products'),
     path('products/<int:product_id>', views.individual, name='api-individual'),
-    path('login/', views.login, name='api-login'),
+    path('login/', obtain_auth_token, name='api-login'),
     path('register/', views.register, name='api-register'),
+    path('products/add/', views.addCart, name='api-addCart'),
+    path('cart/<str:username>/', views.myCart, name='api-Cart'),
+    path('cart/<str:username>/delete/<int:cart_id>', views.deleteCart, name='api-deletecart'),
 ]
