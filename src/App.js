@@ -14,28 +14,19 @@ import IndividualShop from './views/IndividualShop';
 import Cart from './views/Cart';
 import Login from './views/Login';
 import Register from './views/Register';
+import CreateComment from './views/CreateComment';
+import MyPosts from './views/MyPosts';
 
 
 export default class App extends Component {
   constructor() {
     super();
-    const user = localStorage.getItem('user')
- 
-    if (user.search("token") !== -1) {
-      const foundUser = JSON.parse(user)
-      this.state = {
-        cart: [],
-        isLoggedIn: true,
-        user: foundUser,
-      }
+    this.state = {
+      cart: [],
+      isLoggedIn: false,
+      user: null,
     }
-    else {
-      this.state = {
-        cart: [],
-        isLoggedIn: false,
-        user: null,
-      }
-    }
+
   }
   // componentDidMount = () => {
   //   console.log(this.state.user)
@@ -55,22 +46,30 @@ export default class App extends Component {
       token: data.token,
       username,
     }
-    this.setState({
-      isLoggedIn: true,
-      user: user,
-    })
-    localStorage.setItem('user', JSON.stringify(user))
+    if (user.token) {
+      this.setState({
+        isLoggedIn: true,
+        user: user,
+      })
+      localStorage.setItem('user', JSON.stringify(user))
+      this.getCart();
+    }
+
   }
 
   handleLogout = () => {
     localStorage.removeItem('user');
     this.setState({
       isLoggedIn: false,
-      user: null
+      user: null,
+      cart: []
     })
   }
 
   addToCart = (product) => {
+    if (this.state.isLoggedIn) {
+      this.addToCartAPI(product.product_id);
+    }
     this.setState({
       cart: this.state.cart.concat(product)
     })
@@ -83,10 +82,43 @@ export default class App extends Component {
         break
       }
     }
+    if (this.state.isLoggedIn) {
+      this.removeFromCartAPI(product.product_id)
+    }
     this.setState({ cart: newCart })
   }
 
+  removeFromCartAPI = async (p_id) => {
+    const token = JSON.parse(localStorage.getItem('user')).token;
+    const res = await fetch(`http://127.0.0.1:8000/api/cart/delete/`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`
+      },
+      body: JSON.stringify({
+        product_id: p_id
+      })
+    });
+    const data = await res.json()
+    console.log(data)
+  }
 
+  addToCartAPI = async (p_id) => {
+    const token = JSON.parse(localStorage.getItem('user')).token;
+    const res = await fetch(`http://127.0.0.1:8000/api/cart/add/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`
+      },
+      body: JSON.stringify({
+        product_id: p_id
+      })
+    });
+    const data = await res.json()
+    console.log(data)
+  }
 
   sumTotalCart = (cartList) => {
     let total = 0;
@@ -96,33 +128,53 @@ export default class App extends Component {
     return total.toFixed(2)
   }
 
+  getCart = async () => {
+    const token = JSON.parse(localStorage.getItem('user')).token;
+    const res = await fetch(`http://127.0.0.1:8000/api/cart/`, {
+      method: "GET",
+      headers: { "Authorization": `Token ${token}` }
+    });
+    const data = await res.json()
+    this.setState({ cart: data })
+  }
+
+  componentDidMount = () => {
+    if (localStorage.getItem('user')) {
+      this.getCart();
+    }
+
+  }
+
   render() {
     return (
 
       <div>
-        <Nav cart={this.state.cart} sumTotalCart={this.sumTotalCart} handleLogout={this.handleLogout} />
+        <Nav user={this.state.user} cart={this.state.cart} sumTotalCart={this.sumTotalCart} handleLogout={this.handleLogout} />
 
         <Switch>
           <Route exact path='/' render={() => <Home />} />
           <Route exact path='/about' render={() => <About my_company={this.state.company} />} />
-          <Route exact path='/shop' render={() => <Shop addToCart={this.addToCart} isLoggedIn = {this.state.isLoggedIn}/>} />
-          <Route exact path='/shop/:product_id' render={({ match }) => <IndividualShop match={match} addToCart={this.addToCart} isLoggedIn = {this.state.isLoggedIn}/>} />
-          <Route exact path='/cart' render={() => <Cart removeFromCart={this.removeFromCart} sumTotalCart={this.sumTotalCart} cart={this.state.cart} isLoggedIn={this.state.isLoggedIn}/>} />
+          <Route exact path='/shop' render={() => <Shop addToCart={this.addToCart} isLoggedIn={this.state.isLoggedIn} />} />
+          <Route exact path='/shop/:product_id' render={({ match }) => <IndividualShop match={match} addToCart={this.addToCart} isLoggedIn={this.state.isLoggedIn} />} />
+          <Route exact path='/cart' render={() => <Cart removeFromCart={this.removeFromCart} sumTotalCart={this.sumTotalCart} cart={this.state.cart} isLoggedIn={this.state.isLoggedIn} />} />
           {/* {
             this.state.isLoggedIn ?
               <> */}
-                <Route exact path='/news' render={() => <News />} />
-                <Route exact path='/students' render={() => <Students />} />
-                <Route exact path='/blog' render={() => <Blog />} />
-                <Route exact path='/blog/create' render={() => <CreatePost />} />
-                <Route exact path='/blog/:id' render={({ match }) => <PostDetail my_match={match} />} />
-                <Route exact path='/blog/update/:id' render={({ match }) => <UpdatePost my_match={match} />} />
-              {/* </>
+          <Route exact path='/news' render={() => <News />} />
+          <Route exact path='/students' render={() => <Students />} />
+          <Route exact path='/blog' render={() => <Blog />} />
+          <Route exact path='/home' render={() => <MyPosts />} />
+          <Route exact path='/blog/create' render={() => <CreatePost />} />
+          <Route exact path='/blog/:id' render={({ match }) => <PostDetail my_match={match} />} />
+          <Route exact path='/blog/update/:id' render={({ match }) => <UpdatePost my_match={match} />} />
+          <Route exact path='/blog/:id/comment/add' render={({ match }) => <CreateComment my_match={match} />} />
+          {/* </>
               :
               <> */}
-                <Route exact path='/login' render={() => <Login handleLogin={this.handleLogin} />} />
-                <Route exact path='/register' render={() => <Register />} />
-              {/* </>
+          <Route exact path='/login' render={() => <Login handleLogin={this.handleLogin} />} />
+          <Route exact path='/register' render={() => <Register />} />
+
+          {/* </>
           } */}
 
 
