@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
+
 #mailing dependencies imports
 import os 
 #install a package from python (pip install python-dotenv)

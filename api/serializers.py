@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 #import models 
 from django.apps import apps
-from .models import Cart, Product
+from .models import Cart, Product, Comment
 from django.contrib.auth.models import User
 
 Post = apps.get_model('blog', 'Post')
@@ -49,3 +49,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save() #this save function is from the save function from User model not a recursive
         return user
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'

@@ -5,12 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 #import models
 from django.apps import apps
 from rest_framework.serializers import Serializer
-from .models import Cart, Product
+from .models import Cart, Product, Comment
 Post = apps.get_model('blog', 'Post')
 from rest_framework.authtoken.models import Token
 
 #import serializers
-from .serializers import CartSerializer, PostSerializer, ShopSerializer, RegistrationSerializer, CreatePostSerializer
+from .serializers import CartSerializer, PostSerializer, ShopSerializer, RegistrationSerializer, CreatePostSerializer, CommentSerializer
 
 
 
@@ -96,30 +96,116 @@ def register(request):
         data = serializer.errors
     return Response(data)
 
+# @api_view(["POST"])
+# @permission_classes((IsAuthenticated,))
+# def addCart(request):
+#     serializer = CartSerializer(data=request.data)
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response("Successfully added to cart")
+#     else:
+#         print("addCart did not work.")
+#         return Response(serializer.errors)
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def addCart(request):
-    serializer = CartSerializer(data=request.data)
+    user = request.user
+    product = Product.objects.get(product_id = request.data['product_id'])
+    cart = Cart(user=user, product = product)
+    serializer = CartSerializer(cart, data={"user": user.id, "product": product.product_id}, many=False)
     if serializer.is_valid():
         serializer.save()
-        return Response("Successfully added to cart")
-    else:
-        print("addCart did not work.")
-        return Response(serializer.errors)
+        return Response(serializer.data)
+    return Response(serializer.errors)
+
+# @api_view(["GET"])
+# @permission_classes((IsAuthenticated,))
+# def myCart(request,username):
+#     cart = Cart.objects.filter(username = username)
+#     serializer = CartSerializer(cart, many=True)
+#     print("view Cart response went through")
+#     return Response(serializer.data)
 
 @api_view(["GET"])
-def myCart(request,username):
-    cart = Cart.objects.filter(username = username)
-    serializer = CartSerializer(cart, many=True)
+@permission_classes((IsAuthenticated,))
+def myCart(request):
+    user = request.user
+    cart = Cart.objects.filter(user = user)
+    print(cart)
+    products = [item.product for item in cart]
+    print(products)
+    serializer = ShopSerializer(products, many=True)
     print("view Cart response went through")
     return Response(serializer.data)
 
+# @api_view(["DELETE"])
+# @permission_classes((IsAuthenticated,))
+# def deleteCart(request, username, cart_id):
+#     cartItem = Cart.objects.get(cart_id=cart_id)
+#     if cartItem.username != username:
+#         return Response({"messages": "You do not have permission to delete this item."})
+#     cartItem.delete()
+#     return Response({"messages": "Successfully deleted the item."})
 @api_view(["DELETE"])
 @permission_classes((IsAuthenticated,))
-def deleteCart(request, username, cart_id):
+def deleteCart(request):
+    user = request.user
+    cart = Cart.objects.filter(user=user).filter(product=request.data['product_id'])[0]
+    if cart:
+        cart.delete()
+        return Response({'response': "Successfully removed item from cart."})
+    return Response({'response': "You do not have that item in your cart."})
 
-    cartItem = Cart.objects.get(cart_id=cart_id)
-    if cartItem.username != username:
-        return Response({"messages": "You do not have permission to delete this item."})
-    cartItem.delete()
-    return Response({"messages": "Successfully deleted the item."})
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def myComment(request):
+    user = request.user
+    cart = Comment.objects.filter(user = user)
+    serializer = CommentSerializer(cart, many=True)
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def postComment(request, post_id):
+    comments = Comment.objects.filter(post = Post.objects.get(id=post_id))
+    serializer = CommentSerializer(comments, many=True)
+    return Response(serializer.data)
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def addComment(request, post_id):
+    user = request.user
+    print(user)
+    comment = Comment(user=user)
+    serializer = CommentSerializer(comment,data={
+        "post": post_id,
+        "user": user.id,
+        "content" : request.data["content"],
+    })
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors)
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def myPosts(request):
+    user = request.user
+    posts = Post.objects.filter(author=user.id)
+    serializer = PostSerializer(posts, many=True)
+    return Response(serializer.data)
+
+# @api_view(['GET'])
+# @permission_classes((IsAuthenticated,))
+# def getUser(request):
+#     user = request.user
+#     username = Token.objects.get(key=user)
+#     return Response(username)
+
+@api_view(["DELETE"])
+@permission_classes((IsAuthenticated,))
+def deleteComment(request, post_id):
+    comment = Comment.objects.get(id=request.data['comment_id'])
+    if comment:
+        comment.delete()
+        return Response({'response': "Successfully removed comment."})
+    return Response({'response': "You are not able to remove this comment."})
